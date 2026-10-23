@@ -1,0 +1,24 @@
+(() => {
+const courses=[
+{id:1,title:"Matematika Dasar",teacher:"Ibu Rina, S.Pd.",category:"Matematika",icon:"📐",cover:"cover-blue",lessons:12,progress:75,desc:"Konsep bilangan, aljabar, dan pemecahan masalah."},
+{id:2,title:"Ilmu Pengetahuan Alam",teacher:"Pak Dimas, S.Pd.",category:"IPA",icon:"🔬",cover:"cover-green",lessons:10,progress:60,desc:"Mengenal alam, eksperimen, dan sains di sekitar kita."},
+{id:3,title:"Bahasa Indonesia",teacher:"Ibu Maya, S.Pd.",category:"Bahasa",icon:"📚",cover:"cover-peach",lessons:8,progress:88,desc:"Membaca kritis, menulis, dan memahami teks."},
+{id:4,title:"Informatika",teacher:"Pak Arif, S.Kom.",category:"Teknologi",icon:"💻",cover:"cover-pink",lessons:14,progress:48,desc:"Dasar komputer, logika, dan literasi digital."}
+];
+const schedule=[{time:"08.00",icon:"📐",title:"Matematika Dasar",detail:"Bab 4 · Persamaan linear"},{time:"10.00",icon:"🔬",title:"Ilmu Pengetahuan Alam",detail:"Bab 3 · Sistem tata surya"},{time:"13.00",icon:"💻",title:"Informatika",detail:"Bab 2 · Berpikir komputasional"}];
+let assignments=[{id:1,title:"Latihan persamaan linear",course:"Matematika Dasar",due:"Besok",done:false},{id:2,title:"Ringkasan sistem tata surya",course:"Ilmu Pengetahuan Alam",due:"25 Okt",done:false},{id:3,title:"Kuis literasi digital",course:"Informatika",due:"27 Okt",done:false}];
+const $=s=>document.querySelector(s);
+function renderCourses(){const q=$("#search").value.trim().toLowerCase();const list=courses.filter(c=>(c.title+" "+c.category+" "+c.teacher).toLowerCase().includes(q));$("#courseGrid").innerHTML=list.map(c=>'<article class="course"><div class="course-cover '+c.cover+'">'+c.icon+'</div><small>'+c.category+' · '+c.lessons+' pelajaran</small><h3>'+c.title+'</h3><small>'+c.teacher+'</small><div class="course-meta"><span>Progres</span><strong>'+c.progress+'%</strong></div><div class="bar"><span style="width:'+c.progress+'%"></span></div><button data-course="'+c.id+'">Lanjutkan belajar →</button></article>').join("")||'<p class="muted">Kelas tidak ditemukan.</p>';$("#courseCount").textContent=courses.length;$("#lessonCount").textContent=Math.round(courses.reduce((s,c)=>s+c.lessons*c.progress/100,0));}
+function renderSchedule(){$("#scheduleList").innerHTML=schedule.map(s=>'<div class="schedule-item"><span class="time">'+s.time+'</span><span class="line-icon">'+s.icon+'</span><div class="schedule-info"><strong>'+s.title+'</strong><small>'+s.detail+'</small></div><span class="status">Terjadwal</span></div>').join("");}
+function renderAssignments(){$("#assignmentList").innerHTML=assignments.map(a=>'<div class="assignment-item"><span class="line-icon">'+(a.done?"✓":"✎")+'</span><div class="assignment-info"><strong style="'+(a.done?"text-decoration:line-through;opacity:.6":"")+'">'+a.title+'</strong><small>'+a.course+'</small></div><span class="due">'+(a.done?"Selesai":a.due)+'</span><button class="outline-btn" data-assignment="'+a.id+'">'+(a.done?"Buka":"Selesai")+'</button></div>').join("");$("#pendingCount").textContent=assignments.filter(a=>!a.done).length;$("#taskBadge").textContent=assignments.filter(a=>!a.done).length;}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300)}
+$("#search").addEventListener("input",renderCourses);
+$("#courseGrid").addEventListener("click",e=>{const b=e.target.closest("[data-course]");if(!b)return;const c=courses.find(x=>x.id===Number(b.dataset.course));toast("Membuka kelas: "+c.title+". Ini adalah demo antarmuka.");});
+$("#assignmentList").addEventListener("click",e=>{const b=e.target.closest("[data-assignment]");if(!b)return;const a=assignments.find(x=>x.id===Number(b.dataset.assignment));a.done=!a.done;renderAssignments();toast(a.done?"Tugas ditandai selesai!":"Tugas dibuka kembali.");});
+$$("[data-view]").forEach(b=>b.addEventListener("click",()=>{const v=b.dataset.view;$$(".nav").forEach(n=>n.classList.toggle("active",n.dataset.view===v));if(v==="home")window.scrollTo({top:0,behavior:"smooth"});if(v==="courses")$("#courseSection").scrollIntoView({behavior:"smooth"});if(v==="assignments")$("#assignmentSection").scrollIntoView({behavior:"smooth"});if(v==="schedule")document.querySelector(".schedule-panel").scrollIntoView({behavior:"smooth"});}));
+$("#continueBtn").addEventListener("click",()=>$("#courseSection").scrollIntoView({behavior:"smooth"}));
+$("#themeBtn").addEventListener("click",()=>{const dark=document.body.classList.toggle("dark");localStorage.setItem("ruangkelas-theme",dark?"dark":"light");$("#themeBtn").innerHTML=(dark?"☀":"☾")+' <span>Mode '+(dark?"terang":"gelap")+'</span>';});
+if(localStorage.getItem("ruangkelas-theme")==="dark"){$("#themeBtn").click();}
+$("#today").textContent=new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date()).toUpperCase();
+renderCourses();renderSchedule();renderAssignments();
+})();
